@@ -9,7 +9,7 @@ from aiohttp.web import Response
 import sqlite3
 
 
-config = configs['dev']
+config = configs['default']
 rag_embedding_model = SentenceTransformer(config.EMBEDDING_MODEL)
 rag_drivers = {}
 
