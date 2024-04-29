@@ -32,16 +32,20 @@ gunicorn -w <NUMBER OF THREADS> -k uvicorn.workers.UvicornWorker -b 0.0.0.0:<POR
   "content": "Schizophrenia is a mental disorder characterized by reoccurring episodes of psychosis..."
 }
 ```
+---
 
-- `/sales/api/rest/v1/prompt` `POST` - Prompts an LLM with given `queries` and `top`, specifying a number of retrieved documents from the indexer to pay attention to while generating an output.
+- `/sales/api/rest/v1/prompt` `POST` - Prompts an LLM with given `queries` and `top`, specifying a number of retrieved documents from the indexer to pay attention to while generating an output. 
+
+`queries` should be a non-empty list of strings. `top` should be a non-zero integer number.
 ```json
 {
     "queries": ["What social problems are commonly correlated with schizophrenia?", "How can schizophrenia be cured?"],
     "top": 10
 }
 ```
+---
 
-- `/sales/api/rest/v1/auth` `GET` - Initializes a user session, RAG driver on the server side, and returns a session token, authorizing the user to perform server-side actions.
+- `/sales/api/rest/v1/auth` `GET` - Initializes a user session, RAG driver on the server side, and returns a session token, authorizing the user to perform server-side actions. Requires `key` parameter to obtain an API access.
 ```
 [GET] /sales/api/rest/v1/auth?key=admin123 ->
 
