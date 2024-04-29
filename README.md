@@ -53,4 +53,9 @@ HTTP 200:
 eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2ZXIiLCJzZXNzX2lkIjoyMjM0NzIxMDYxNTUxMzYzfQ.FzaeHugT0SrAGraLvopFmEV3D_nU_qQz5pnhgGq440rrcXOlBsQuXip2OQ0ppQq7qD5TD5cB-xwH5be1t3LaxA
 ```
 
+Once the token is obtained, it should be used in the `Authorization` header, followed by `Bearer`.
+```bash
+"Authorization": "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2ZXIiLCJzZXNzX2lkIjoyMjM0NzIxMDYxNTUxMzYzfQ.FzaeHugT0SrAGraLvopFmEV3D_nU_qQz5pnhgGq440rrcXOlBsQuXip2OQ0ppQq7qD5TD5cB-xwH5be1t3LaxA"
+```
+
 ---
