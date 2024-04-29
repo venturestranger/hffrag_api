@@ -16,7 +16,7 @@ async def auth_middleware_v1(request: Request, handler):
 		if payload.get('iss', None) == config.ISSUER and payload.get('sess_id', None) != None:
 			# if token is valid, pass the retrieved session id to further calls
 			if does_session_exist(payload['sess_id']):
-				request.state.id = payload['sess_id']
+				request.state.sess_id = payload['sess_id']
 				return await handler(request)
 			else:
 				return Response(content='Gone', status_code=410)

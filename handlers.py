@@ -1,29 +1,37 @@
 from fastapi import Request, Response
 from random import randint
-from utils import config, init_session
+from utils import config, init_session, rag_drivers, Arequests, Document, Query
+import asyncio
 import jwt
 
 
-async def doc_get_v1(request: Request):
-	return Response(content=str(request.state.id), status_code=200)
+async def doc_post_v1(document: Document, request: Request) -> Response:
+	if document.url != None:
+		await asyncio.to_thread(rag_drivers[request.state.sess_id].indexer.add, url=document.url, label=str(request.state.sess_id))
+	elif document.content != None:
+		await asyncio.to_thread(rag_drivers[request.state.sess_id].indexer.add, content=document.content, label=str(request.state.sess_id))
+
+	return Response(content='Created', status_code=201)
 
 
-async def doc_post_v1(request: Request):
-	return Response(content='OK', status_code=200)
+async def prompt_post_v1(query: Query, request: Request) -> Response:
+	if len(query.queries) != 0 and len(query.queries[0]) > 0:
+		ret = await rag_drivers[request.state.sess_id].aprompt(query.queries, query.top, Arequests())
 
+		return Response(content=ret, status_code=200)
+	else:
+		return Response(content="Unprocessable Entity", status_code=422)
+	
 
-async def prompt_get_v1(request: Request):
-	return Response(content='OK', status_code=200)
-
-
-def auth_get_v1(request: Request):
+# generate a token for a user if an access key is right
+def auth_get_v1(request: Request) -> Response:
 	key = request.query_params.get('key', None)
 
 	if key == config.AUTH_KEY:
 		sess_id = randint(0, 9223372036854775)
 
-		while init_session(sess_id) == False:
-			sess_id = randint(0, 9223372036854775)
+		if init_session(sess_id) == False:
+			return Response(content='Conflict', status_code=409)
 
 		payload = {
 			'iss': config.ISSUER,

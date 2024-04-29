@@ -3,10 +3,13 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+example.py
+
 .DS_Store
 
+hffrag/
 tmp/
-storage/headings.db
+storage/sessions.sql
 
 # C extensions
 *.so

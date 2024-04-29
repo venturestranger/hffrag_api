@@ -1,11 +1,29 @@
 from config import configs
 from datetime import datetime
 from datetime import timedelta
+from sentence_transformers import SentenceTransformer
+from hffrag import Indexer, Templater, Driver
+from pydantic import BaseModel
+from aiohttp import ClientSession
+from aiohttp.web import Response
 import sqlite3
 
 
 config = configs['dev']
+rag_embedding_model = SentenceTransformer(config.EMBEDDING_MODEL)
 rag_drivers = {}
+
+
+# prompt document upload
+class Document(BaseModel):
+	content: str | None = None
+	url: str | None = None
+
+
+# prompt document upload
+class Query(BaseModel):
+	queries: list
+	top: int | None = 1
 
 
 # initialize a session database
@@ -36,8 +54,8 @@ def init_session(sess_id: int) -> bool:
 	# if not found, initialize a new session with sess_id
 	if len(dat) == 0:
 		# clean up a RAG driver previously associated with this session id
-		rag_drivers.pop(sess_id) 
-		# rag_drivers[sess_id] = a new RAG driver
+		rag_drivers.pop(sess_id, None) 
+		rag_drivers[sess_id] = RAGDriver(rag_embedding_model)
 
 		cur.execute("INSERT INTO sessions(id, issued_when) VALUES(?, ?)", (sess_id, str(datetime.now())))
 		conn.commit()
@@ -45,7 +63,7 @@ def init_session(sess_id: int) -> bool:
 
 	conn.close()
 
-	if len(dat) == 0:
+	if len(dat) == 0 and rag_drivers.get(sess_id, None) != None:
 		return True
 	else:
 		return False
@@ -63,7 +81,7 @@ def does_session_exist(sess_id: int) -> bool:
 	dat = cur.fetchall()
 	conn.close()
 
-	if len(dat) == 0:
+	if len(dat) == 0 or rag_drivers.get(sess_id, None) == None:
 		return False
 	else:
 		return True
@@ -75,16 +93,93 @@ def invalidate_session(sess_id: int):
 	cur = conn.cursor()
 
 	# clean up a RAG driver associated with this session id
-	rag_drivers.pop(sess_id)
+	rag_drivers.pop(sess_id, None)
 
 	cur.execute("DELETE FROM sessions WHERE id < ?", (sess_id,))
 	conn.commit()
 	conn.close()
 	
 
-class RAGDriver:
+# asynchronous http client
+class Arequests:
 	def __init__(self):
 		pass
 	
-	def add_doc(self, doc):
-		pass
+	async def get(self, url: str) -> Response:
+		async with ClientSession(trust_env=True) as session:
+			return await session.get(url)
+
+	async def post(self, url: str, json: dict) -> Response:
+		async with ClientSession(trust_env=True) as session:
+			return await session.post(url, json=json)
+
+
+# personalized rag driver for each connection
+class RAGDriver:
+	def __init__(self, embedding: SentenceTransformer = None):
+		if embedding == None:
+			self.indexer = Indexer()
+		else:
+			self.indexer = Indexer(embedding=embedding)
+
+		self.llm = Driver()
+	
+	# synchronously prompt LLM
+	def prompt(self, queries: list, top: int):
+		msgs = [
+			('system', 'Geven that: '),
+		]
+		args = {}
+
+		for query in range(len(queries)):
+			relevant = self.indexer.search(queries[query], top=top)
+
+			for i in range(top):
+				if relevant[i] == -1:
+					break
+
+				arg = f'query_{query}_{i}'
+				args[arg] = self.indexer.retrieve(relevant[i])[1]
+				msgs.append(('system', '{' + arg + '}'))
+
+		msgs.append(('system', 'Answer the following:'))
+
+		for query in range(len(queries)):
+			arg = f'query_{query}'
+			args[arg] = queries[query]
+			msgs.append(('human', '{' + arg + '}'))
+
+		template = Templater(msgs)
+
+		output = self.llm.query(template=template, **args)
+		return output
+	
+	# asynchronously prompt LLM
+	async def aprompt(self, queries: list, top: int, async_requests: Arequests):
+		msgs = [
+			('system', 'You know: '),
+		]
+		args = {}
+
+		for query in range(len(queries)):
+			relevant = self.indexer.search(queries[query], top=top)
+
+			for i in range(top):
+				if relevant[i] == -1:
+					break
+
+				arg = f'query_{query}_{i}'
+				args[arg] = self.indexer.retrieve(relevant[i])[1]
+				msgs.append(('system', '{' + arg + '}'))
+
+		msgs.append(('system', 'Answer the following:'))
+
+		for query in range(len(queries)):
+			arg = f'query_{query}'
+			args[arg] = queries[query]
+			msgs.append(('human', '{' + arg + '}'))
+
+		template = Templater(msgs)
+
+		output = await self.llm.aquery(template=template, async_requests=async_requests, **args)
+		return output
