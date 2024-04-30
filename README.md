@@ -34,7 +34,7 @@ gunicorn -w <NUMBER OF THREADS> -k uvicorn.workers.UvicornWorker -b 0.0.0.0:<POR
 ```
 ---
 
-- `/sales/api/rest/v1/prompt` `POST` - Prompts an LLM with given `queries` and `top`, specifying a number of retrieved documents from the indexer to pay attention to while generating an output. 
+- `/sales/api/rest/v1/prompt` `POST` - Prompts an LLM with given `queries` and `top`, specifying a number of retrieved documents used for output generation (the more the values is, the more accurate answers it will generate, but might not fit the context window length). 
 
 `queries` should be a non-empty list of strings. `top` should be a non-zero integer number.
 ```json
