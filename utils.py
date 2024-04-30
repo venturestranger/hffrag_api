@@ -2,6 +2,7 @@ from config import configs
 from datetime import datetime
 from datetime import timedelta
 from sentence_transformers import SentenceTransformer
+from deep_translator import GoogleTranslator
 from hffrag import Indexer, Templater, Driver
 from pydantic import BaseModel
 from aiohttp import ClientSession
@@ -23,8 +24,9 @@ class Document(BaseModel):
 # prompt document upload
 class Query(BaseModel):
 	queries: list | None = []
-	top: int | None = 1
 	context: list | None = []
+	top: int | None = 1
+	lang: str | None = 'en'
 
 
 # initialize a session database
@@ -126,11 +128,24 @@ class RAGDriver:
 		self.llm = Driver()
 	
 	# synchronously prompt LLM
-	def prompt(self, queries: list, context: list, top: int) -> str:
+	def prompt(self, queries: list, context: list, top: int, lang: str = 'en') -> str:
 		msgs = [
 			('system', 'Geven that: '),
 		]
 		args = {}
+
+		if lang != 'en':
+			for i in range(len(context)):
+				try:
+					context[i] = GoogleTranslator(source=lang, target='en').translate(context[i][:4999])
+				except:
+					pass
+				
+			for i in range(len(queries)):
+				try:
+					queries[i] = GoogleTranslator(source=lang, target='en').translate(queries[i][:4999])
+				except:
+					pass
 
 		for query in context:
 			msgs.append(('system', query))
@@ -156,14 +171,32 @@ class RAGDriver:
 		template = Templater(msgs)
 
 		output = self.llm.query(template=template, **args)
-		return output
+		try:
+			if lang == 'en':
+				raise Exception()
+			return GoogleTranslator(source='en', target=lang).translate(output[:4999])
+		except:
+			return output
 	
 	# asynchronously prompt LLM
-	async def aprompt(self, queries: list, context: list, top: int, async_requests: Arequests) -> str:
+	async def aprompt(self, queries: list, context: list, top: int, async_requests: Arequests, lang: str = 'en') -> str:
 		msgs = [
 			('system', 'You know: '),
 		]
 		args = {}
+
+		if lang != 'en':
+			for i in range(len(context)):
+				try:
+					context[i] = GoogleTranslator(source=lang, target='en').translate(context[i][:4999])
+				except:
+					pass
+				
+			for i in range(len(queries)):
+				try:
+					queries[i] = GoogleTranslator(source=lang, target='en').translate(queries[i][:4999])
+				except:
+					pass
 
 		for query in context:
 			msgs.append(('system', query))
@@ -189,4 +222,9 @@ class RAGDriver:
 		template = Templater(msgs)
 
 		output = await self.llm.aquery(template=template, async_requests=async_requests, **args)
-		return output
+		try:
+			if lang == 'en':
+				raise Exception()
+			return GoogleTranslator(source='en', target=lang).translate(output[:4999])
+		except:
+			return output

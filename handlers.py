@@ -16,7 +16,7 @@ async def doc_post_v1(document: Document, request: Request) -> Response:
 
 async def prompt_post_v1(query: Query, request: Request) -> Response:
 	if len(query.queries) != 0 and len(query.queries[0]) > 0:
-		ret = await rag_drivers[request.state.sess_id].aprompt(queries=query.queries, context=query.context, top=query.top, async_requests=Arequests())
+		ret = await rag_drivers[request.state.sess_id].aprompt(queries=query.queries, context=query.context, top=query.top, async_requests=Arequests(), lang=query.lang)
 
 		return Response(content=ret, status_code=200)
 	else:
