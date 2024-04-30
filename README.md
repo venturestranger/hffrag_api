@@ -24,12 +24,12 @@ gunicorn -w <NUMBER OF THREADS> -k uvicorn.workers.UvicornWorker -b 0.0.0.0:<POR
 - `/sales/api/rest/v1/doc` `POST` - Adds a document to the user's RAG driver indexer (either a text document `content` or URL `url` to the website from which content will be scraped).
 ```json
 {
-  "url": "https://en.wikipedia.org/wiki/Schizophrenia"
+    "url": "https://en.wikipedia.org/wiki/Schizophrenia"
 }
 ```
 ```json
 {
-  "content": "Schizophrenia is a mental disorder characterized by reoccurring episodes of psychosis..."
+    "content": "Schizophrenia is a mental disorder characterized by reoccurring episodes of psychosis..."
 }
 ```
 ---
