@@ -51,6 +51,15 @@ gunicorn -w <NUMBER OF THREADS> -k uvicorn.workers.UvicornWorker -b 0.0.0.0:<POR
     "context": ["Depending on type of schizophrenia, people with schizophrenia experience ..."]
 }
 ```
+`lang` is another optional field that identifies what language is used for `quries` and `context` fields. It might be important to specify when non-English queries attempt to prompt an LLM that was majorly trained on English text corpora.
+```json
+{
+    "queries": ["Какие недуги переживают люди с шизофренией?"],
+    "top": 10,
+    "context": ["В зависимости от типа шизофрении, спект переживаемого опыта может ..."],
+    "lang": "ru"
+}
+```
 ---
 
 - `/sales/api/rest/v1/auth` `GET` - Initializes a user session, RAG driver on the server side, and returns a session token, authorizing the user to perform server-side actions. Requires `key` parameter to obtain an API access.
