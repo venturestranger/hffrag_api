@@ -43,6 +43,14 @@ gunicorn -w <NUMBER OF THREADS> -k uvicorn.workers.UvicornWorker -b 0.0.0.0:<POR
     "top": 10
 }
 ```
+`context` is an optional field that provides the system with more context information that might be helpful for output generation. The field should be a non-empty list of strings.
+```json
+{
+    "queries": ["What do people with schizophrenia experience?"],
+    "top": 10,
+    "context": ["Depending on type of schizophrenia, people with schizophrenia experience ..."]
+}
+```
 ---
 
 - `/sales/api/rest/v1/auth` `GET` - Initializes a user session, RAG driver on the server side, and returns a session token, authorizing the user to perform server-side actions. Requires `key` parameter to obtain an API access.
