@@ -47,7 +47,6 @@ gunicorn -w <NUMBER OF THREADS> -k uvicorn.workers.UvicornWorker -b 0.0.0.0:<POR
 ```json
 {
     "queries": ["What do people with schizophrenia experience?"],
-    "top": 10,
     "context": ["Depending on type of schizophrenia, people with schizophrenia experience ..."]
 }
 ```
