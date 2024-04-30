@@ -22,8 +22,9 @@ class Document(BaseModel):
 
 # prompt document upload
 class Query(BaseModel):
-	queries: list
+	queries: list | None = []
 	top: int | None = 1
+	context: list | None = []
 
 
 # initialize a session database
@@ -125,11 +126,14 @@ class RAGDriver:
 		self.llm = Driver()
 	
 	# synchronously prompt LLM
-	def prompt(self, queries: list, top: int):
+	def prompt(self, queries: list, context: list, top: int) -> str:
 		msgs = [
 			('system', 'Geven that: '),
 		]
 		args = {}
+
+		for query in context:
+			msgs.append(('system', query))
 
 		for query in range(len(queries)):
 			relevant = self.indexer.search(queries[query], top=top)
@@ -142,7 +146,7 @@ class RAGDriver:
 				args[arg] = self.indexer.retrieve(relevant[i])[1]
 				msgs.append(('system', '{' + arg + '}'))
 
-		msgs.append(('system', 'Answer the following:'))
+		msgs.append(('system', 'Answer the following: '))
 
 		for query in range(len(queries)):
 			arg = f'query_{query}'
@@ -155,11 +159,14 @@ class RAGDriver:
 		return output
 	
 	# asynchronously prompt LLM
-	async def aprompt(self, queries: list, top: int, async_requests: Arequests):
+	async def aprompt(self, queries: list, context: list, top: int, async_requests: Arequests) -> str:
 		msgs = [
 			('system', 'You know: '),
 		]
 		args = {}
+
+		for query in context:
+			msgs.append(('system', query))
 
 		for query in range(len(queries)):
 			relevant = self.indexer.search(queries[query], top=top)
