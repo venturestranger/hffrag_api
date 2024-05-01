@@ -1,4 +1,5 @@
 from fastapi import Request, Response
+from fastapi.responses import StreamingResponse
 from random import randint
 from utils import config, init_session, rag_drivers, Arequests, Document, Query
 import asyncio
@@ -16,9 +17,12 @@ async def doc_post_v1(document: Document, request: Request) -> Response:
 
 async def prompt_post_v1(query: Query, request: Request) -> Response:
 	if len(query.queries) != 0 and len(query.queries[0]) > 0:
-		ret = await rag_drivers[request.state.sess_id].aprompt(queries=query.queries, context=query.context, top=query.top, async_requests=Arequests(), lang=query.lang)
+		if query.stream == False:
+			ret = await rag_drivers[request.state.sess_id].aprompt(queries=query.queries, context=query.context, top=query.top, async_requests=Arequests(), lang=query.lang)
 
-		return Response(content=ret, status_code=200)
+			return Response(content=ret, status_code=200)
+		else:
+			return StreamingResponse(rag_drivers[request.state.sess_id].sprompt(queries=query.queries, context=query.context, top=query.top, lang=query.lang))
 	else:
 		return Response(content="Unprocessable Entity", status_code=422)
 	

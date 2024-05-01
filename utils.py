@@ -27,6 +27,7 @@ class Query(BaseModel):
 	context: list | None = []
 	top: int | None = 1
 	lang: str | None = 'en'
+	stream: bool | None = False
 
 
 # initialize a session database
@@ -177,6 +178,52 @@ class RAGDriver:
 			return GoogleTranslator(source='en', target=lang).translate(output[:4999])
 		except:
 			return output
+
+	# synchronously prompt LLM with streaming
+	def sprompt(self, queries: list, context: list, top: int, lang: str = 'en') -> str:
+		msgs = [
+			('system', 'Geven that: '),
+		]
+		args = {}
+
+		if lang != 'en':
+			for i in range(len(context)):
+				try:
+					context[i] = GoogleTranslator(source=lang, target='en').translate(context[i][:4999])
+				except:
+					pass
+				
+			for i in range(len(queries)):
+				try:
+					queries[i] = GoogleTranslator(source=lang, target='en').translate(queries[i][:4999])
+				except:
+					pass
+
+		for query in context:
+			msgs.append(('system', query))
+
+		for query in range(len(queries)):
+			relevant = self.indexer.search(queries[query], top=top)
+
+			for i in range(top):
+				if relevant[i] == -1:
+					break
+
+				arg = f'query_{query}_{i}'
+				args[arg] = self.indexer.retrieve(relevant[i])[1]
+				msgs.append(('system', '{' + arg + '}'))
+
+		msgs.append(('system', 'Answer the following: '))
+
+		for query in range(len(queries)):
+			arg = f'query_{query}'
+			args[arg] = queries[query]
+			msgs.append(('human', '{' + arg + '}'))
+
+		template = Templater(msgs)
+
+		for output in self.llm.squery(template=template, **args):
+			yield output
 	
 	# asynchronously prompt LLM
 	async def aprompt(self, queries: list, context: list, top: int, async_requests: Arequests, lang: str = 'en') -> str:
