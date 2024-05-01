@@ -9,6 +9,13 @@ To install all the necessary libraries, use the following command:
 ```bash
 pip install -r requirements.txt; git clone https://github.com/venturestranger/hffrag
 ```
+You also need to initialize `sessions.db` for storing user sessions. To do so, you should use call `init_sessions_db()` function from `utils.py`
+
+```bash
+$> python
+python> from utils import init_sessions_db
+python> init_sessions_db()
+```
 
 ## Setup
 To start the application in development mode, use the following command:
