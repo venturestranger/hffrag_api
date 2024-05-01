@@ -9,7 +9,7 @@ To install all the necessary libraries, use the following command:
 ```bash
 pip install -r requirements.txt; git clone https://github.com/venturestranger/hffrag
 ```
-You also need to initialize `sessions.db` for storing user sessions. To do so, you should use call `init_sessions_db()` function from `utils.py`
+You also need to initialize `sessions.db` for storing user sessions. To do so, you should call `init_sessions_db()` function from `utils.py`:
 
 ```bash
 $> python
