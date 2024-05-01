@@ -32,15 +32,19 @@ gunicorn -w <NUMBER OF THREADS> -k uvicorn.workers.UvicornWorker -b 0.0.0.0:<POR
     "content": "Schizophrenia is a mental disorder characterized by reoccurring episodes of psychosis..."
 }
 ```
+
+### Response
+It will return a status code with a corresponding message.
+
 ---
 
-- `/sales/api/rest/v1/prompt` `POST` - Prompts an LLM with given `queries` and `top`, specifying a number of retrieved documents used for output generation (the more the values is, the more accurate answers it will generate, but might not fit the context window length). 
+- `/sales/api/rest/v1/prompt` `POST` - Prompts an LLM with given `queries` and `top`, specifying a number of retrieved documents used for output generation (the higher the values is, the more accurate answers an LLM will generate, but might not fit its context window length). 
 
-`queries` should be a non-empty list of strings. `top` should be a non-zero integer number.
+`queries` should be a non-empty list of strings. `top` should be a non-zero integer number. If not specified, it sets automatically to `1`.
 ```json
 {
     "queries": ["What social problems are commonly correlated with schizophrenia?", "How can schizophrenia be cured?"],
-    "top": 10
+    "top": 10,
 }
 ```
 `context` is an optional field that provides the system with more context information that might be helpful for output generation. The field should be a non-empty list of strings.
@@ -50,7 +54,15 @@ gunicorn -w <NUMBER OF THREADS> -k uvicorn.workers.UvicornWorker -b 0.0.0.0:<POR
     "context": ["Depending on type of schizophrenia, people with schizophrenia experience ..."]
 }
 ```
-`lang` is another optional field that identifies what language is used for `quries` and `context` fields. It might be important to specify when non-English queries attempt to prompt an LLM that was majorly trained on English text corpora.
+`stream` is another optional field responsible for response streaming (will stream each generated token). The field should be either `true` or `false`. If not specified, it sets automatically to `false`.
+```json
+{
+    "queries": ["What do people with schizophrenia experience?"],
+    "top": 7,
+    "stream": false
+}
+```
+`lang` is the last optional field that identifies what language is used for `quries` and `context` fields. It might be important to specify when non-English queries attempt to prompt an LLM that was majorly trained on English text corpora. By default, it is `en`.
 ```json
 {
     "queries": ["Какие недуги переживают люди с шизофренией?"],
@@ -59,6 +71,22 @@ gunicorn -w <NUMBER OF THREADS> -k uvicorn.workers.UvicornWorker -b 0.0.0.0:<POR
     "lang": "ru"
 }
 ```
+
+### Response
+
+The response is a json package, containing fields `response` (string) and `done` (boolean). The `response` field carries generated tokens. The `done` field returns whether generation is finished. 
+```json
+{
+    "response": " Schizophrenia is associated with several social problems, including: social isolation and withdrawal, difficulties in forming and maintaining relationships, poor communication skills, and unemployment or underemployment",
+    "done": true
+}
+```
+
+In case if streaming was enabled:
+```json
+{"response": " Sch", "done": false}{"response": "iz", "done": false}{"response": "oph", "done": false}{"response": "ren", "done": false}{"response": "ia", "done": false}{"response": " is", "done": false}...
+```
+
 ---
 
 - `/sales/api/rest/v1/auth` `GET` - Initializes a user session, RAG driver on the server side, and returns a session token, authorizing the user to perform server-side actions. Requires `key` parameter to obtain an API access.
@@ -69,7 +97,8 @@ HTTP 200:
 eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2ZXIiLCJzZXNzX2lkIjoyMjM0NzIxMDYxNTUxMzYzfQ.FzaeHugT0SrAGraLvopFmEV3D_nU_qQz5pnhgGq440rrcXOlBsQuXip2OQ0ppQq7qD5TD5cB-xwH5be1t3LaxA
 ```
 
-Once the token is obtained, it should be used in the `Authorization` header, followed by `Bearer`.
+### Response
+It will return an authorization token. Once the token is obtained, it should be used in the `Authorization` header, followed by `Bearer`.
 ```bash
 "Authorization": "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2ZXIiLCJzZXNzX2lkIjoyMjM0NzIxMDYxNTUxMzYzfQ.FzaeHugT0SrAGraLvopFmEV3D_nU_qQz5pnhgGq440rrcXOlBsQuXip2OQ0ppQq7qD5TD5cB-xwH5be1t3LaxA"
 ```
