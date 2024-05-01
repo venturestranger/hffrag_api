@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from aiohttp import ClientSession
 from aiohttp.web import Response
 import sqlite3
+import json
 
 
 config = configs['default']
@@ -175,8 +176,13 @@ class RAGDriver:
 		try:
 			if lang == 'en':
 				raise Exception()
-			return GoogleTranslator(source='en', target=lang).translate(output[:4999])
+
+			output = json.loads(output)
+			output['response'] = GoogleTranslator(source='en', target=lang).translate(output['response'][:4999])
+			output = json.dumps(output, ensure_ascii=False)
 		except:
+			pass
+		finally:
 			return output
 
 	# synchronously prompt LLM with streaming
@@ -272,6 +278,11 @@ class RAGDriver:
 		try:
 			if lang == 'en':
 				raise Exception()
-			return GoogleTranslator(source='en', target=lang).translate(output[:4999])
+			
+			output = json.loads(output)
+			output['response'] = GoogleTranslator(source='en', target=lang).translate(output['response'][:4999])
+			output = json.dumps(output, ensure_ascii=False)
 		except:
+			pass
+		finally:
 			return output
