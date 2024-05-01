@@ -44,7 +44,7 @@ It will return a status code with a corresponding message.
 ```json
 {
     "queries": ["What social problems are commonly correlated with schizophrenia?", "How can schizophrenia be cured?"],
-    "top": 10,
+    "top": 10
 }
 ```
 `context` is an optional field that provides the system with more context information that might be helpful for output generation. The field should be a non-empty list of strings.
