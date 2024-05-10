@@ -46,7 +46,7 @@ if __name__ == '__main__':
 	uvicorn.run(app, host='0.0.0.0', port=config.PORT)
 
 
-async def gunicorn_factory():
+def gunicorn_factory():
 	reset_llms()
 
 	return app

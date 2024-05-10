@@ -12,7 +12,6 @@ import json
 
 
 config = configs['default']
-mongo_driver = None
 rag_embedding_model = SentenceTransformer(config.EMBEDDING_MODEL)
 rag_drivers = {}
 
