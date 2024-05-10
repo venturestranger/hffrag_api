@@ -54,6 +54,7 @@ def init_storage():
 				idle INTEGER NOT NULL
 			)
 		""")
+		cur.execute('INSERT INTO llm_drivers(uri, type, idle) values(?, ?, ?)', ('http://localhost:11434/api/generate', 'local', 1))
 		conn.commit()
 
 
