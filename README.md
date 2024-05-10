@@ -13,8 +13,8 @@ You also need to initialize `sessions.db` for storing user sessions. To do so, y
 
 ```bash
 $> python
-python> from utils import init_sessions_db
-python> init_sessions_db()
+python> from utils import init_storage
+python> init_storage()
 ```
 
 ## Setup
