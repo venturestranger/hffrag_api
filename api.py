@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from middlewares import auth_middleware_v1
 from handlers import doc_post_v1, prompt_post_v1, auth_get_v1
-from utils import config, Document, Query
+from utils import config, reset_llms, Document, Query
 
 
 app = FastAPI()
@@ -40,9 +40,14 @@ app.add_middleware(
 
 
 if __name__ == '__main__':
+	reset_llms()
+
 	import uvicorn
 	uvicorn.run(app, host='0.0.0.0', port=config.PORT)
 
+
 async def gunicorn_factory():
+	reset_llms()
+
 	return app
 

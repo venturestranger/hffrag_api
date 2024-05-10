@@ -5,6 +5,7 @@ class Config:
 	ISSUER = 'server'
 	PORT = 4321
 	SESSIONS_DB_PATH = './storage/sessions.sql'
+	LLM_DRIVERS_DB_PATH = './storage/llm_drivers.sql'
 	SESSION_LIFETIME = 3600
 
 
