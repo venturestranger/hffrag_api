@@ -1,6 +1,6 @@
 # HFFRAG API
 
-HFFRAG API is an API implementation based on FastAPI and multithreading for the `HFFRAG` - RAG (Retrieval Augmented Generation) mechanism using `HuggingFace` sentence transformers and `Faiss` similarity search algorithm.
+HFFRAG API is an API implementation based on FastAPI and multithreading for the `HFFRAG` - RAG (Retrieval Augmented Generation) mechanism using `HuggingFace` sentence transformers and `Faiss` similarity search algorithm. The project implements LLM request balancing and enables using multiple LLM agents (stored in `./storage/llm_drivers.sql`). Currently supported ones are those powered with `Ollama` and `OpenAI`.
 
 The `HFFRAG` project is hosted on GitHub and is available at: [HFFRAG GitHub Repository](https://github.com/venturestranger/hffrag)
 
@@ -24,7 +24,7 @@ python api.py
 ```
 To start the application in production mode, use the following command:
 ```bash
-gunicorn -w <NUMBER OF THREADS> -k uvicorn.workers.UvicornWorker -b 0.0.0.0:<PORT> api:gunicorn_factory
+gunicorn -w 1 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:<PORT> api:gunicorn_factory
 ```
 
 ## Routing
