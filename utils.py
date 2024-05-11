@@ -31,7 +31,7 @@ class Query(BaseModel):
 	stream: bool | None = False
 
 
-# initialize a session database
+# initialize a llm drivers database and a session database
 def init_storage():
 	with sqlite3.connect(config.SESSIONS_DB_PATH) as conn:
 		cur = conn.cursor()
@@ -54,6 +54,7 @@ def init_storage():
 			)
 		""")
 		cur.execute('INSERT INTO llm_drivers(uri, type, idle) values(?, ?, ?)', ('http://localhost:11434/api/generate', 'local', 1))
+		cur.execute('INSERT INTO llm_drivers(uri, type, idle) values(?, ?, ?)', (config.OPENAI_TOKEN, 'openai', 1))
 		conn.commit()
 
 
@@ -224,7 +225,7 @@ class RAGDriver:
 			invalidate_llm(llm[0])
 
 			try:
-				output = self.llm.query(template=template, base_url=llm[1], **args)
+				output = self.llm.query(template=template, url_token=llm[1], llm_type=llm[2], **args)
 			except:
 				return json.dumps({'response': '#', 'done': True}, ensure_ascii=False)
 			finally:
@@ -294,7 +295,7 @@ class RAGDriver:
 			invalidate_llm(llm[0])
 
 			try:
-				for output in self.llm.squery(template=template, **args):
+				for output in self.llm.squery(template=template, url_token=llm[1], llm_type=llm[2], **args):
 					invalidate_llm(llm[0])
 					validate_llm(llm[0])
 					yield output
@@ -356,7 +357,7 @@ class RAGDriver:
 			invalidate_llm(llm[0])
 
 			try:
-				output = await self.llm.aquery(template=template, async_requests=async_requests, base_url=llm[1], **args)
+				output = await self.llm.aquery(template=template, async_requests=async_requests, url_token=llm[1], llm_type=llm[2], **args)
 			except:
 				return json.dumps({'response': '#', 'done': True}, ensure_ascii=False)
 			finally:

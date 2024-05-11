@@ -7,6 +7,7 @@ class Config:
 	SESSIONS_DB_PATH = './storage/sessions.sql'
 	LLM_DRIVERS_DB_PATH = './storage/llm_drivers.sql'
 	SESSION_LIFETIME = 3600
+	OPENAI_TOKEN = ''
 
 
 class Development(Config):
