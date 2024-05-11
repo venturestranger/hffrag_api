@@ -1,6 +1,6 @@
 # HFFRAG API
 
-HFFRAG API is an API implementation based on FastAPI and multithreading for the `HFFRAG` - RAG (Retrieval Augmented Generation) mechanism using `HuggingFace` sentence transformers and `Faiss` similarity search algorithm. The project implements LLM request balancing and enables using multiple LLM agents (stored in `./storage/llm_drivers.sql`). Currently supported ones are those powered with `Ollama` and `OpenAI`.
+HFFRAG API is an API implementation based on FastAPI and multithreading for the `HFFRAG` - RAG (Retrieval Augmented Generation) mechanism using `HuggingFace` sentence transformers and `Faiss` similarity search algorithm. The project implements balancing LLM prompting and enables using multiple LLM agents to parallelize token generation. The API currently supports LLM drivers powered with `Ollama` and `OpenAI`.
 
 The `HFFRAG` project is hosted on GitHub and is available at: [HFFRAG GitHub Repository](https://github.com/venturestranger/hffrag)
 
